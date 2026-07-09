@@ -1,6 +1,5 @@
 # Airport AI Platform
 
-![Airport AI Platform Banner](docs/assets/banner-placeholder.png)
 
 An enterprise-grade, AI-powered Airport Operations Monitoring Platform. This local-first, multi-agent system monitors live airport metrics and intelligently routes natural language queries to the correct data source, providing actionable insights for airport staff without relying on external cloud APIs.
 
@@ -198,15 +197,6 @@ Located in `.env`:
 - `RAG_CHUNK_SIZE` / `RAG_CHUNK_OVERLAP`: Document splitting parameters.
 
 ---
-
-## 📸 Screenshots
-
-![Dashboard](docs/assets/dashboard-placeholder.png)
-*Live Operations Dashboard*
-
-![AI Assistant](docs/assets/assistant-placeholder.png)
-*Multi-Agent AI Assistant handling complex queries*
-
 ---
 
 ## 🔮 Future Improvements
