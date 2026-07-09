@@ -119,7 +119,6 @@ docker compose up --build -d
 | analyst | Analyst!2026#ChangeMeNow | Analyst |
 | viewer | Viewer!2026#ChangeMeNow | Viewer |
 
-> ⚠️ Change default passwords immediately in any production deployment.
 
 ## Docker Containers
 
