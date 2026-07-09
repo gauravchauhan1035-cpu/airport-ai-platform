@@ -3,9 +3,9 @@
 
 An enterprise-grade, AI-powered Airport Operations Monitoring Platform. This local-first, multi-agent system monitors live airport metrics and intelligently routes natural language queries to the correct data source, providing actionable insights for airport staff without relying on external cloud APIs.
 
----
 
-## 📌 Project Overview
+
+## Project Overview
 
 ### Business Problem
 Modern airports generate massive amounts of operational data (passenger flow, terminal temperatures, security wait times, runway statuses) and maintain vast libraries of procedural documents (Standard Operating Procedures, safety manuals). Staff typically have to navigate multiple legacy dashboards to find metrics and manually search through PDF documents for policy answers.
@@ -15,7 +15,7 @@ The Airport AI Platform unifies these workflows. Using a localized Large Languag
 
 ---
 
-## ✨ Features
+##  Features
 
 - **Multi-Agent AI Orchestration:** Automatically routes questions to specialized agents (SQL, RAG, or Chat) based on semantic intent.
 - **Natural Language to SQL:** Safely converts user queries into read-only SQL to fetch live operational metrics.
@@ -27,7 +27,7 @@ The Airport AI Platform unifies these workflows. Using a localized Large Languag
 
 ---
 
-## 🏗 System Architecture
+##  System Architecture
 
 The platform follows a decoupled, containerized architecture.
 
@@ -70,7 +70,7 @@ graph TD
 
 ---
 
-## 🔐 Authentication & RBAC
+##  Authentication & RBAC
 
 The system utilizes stateless JWT (JSON Web Tokens) for authentication.
 
@@ -84,7 +84,7 @@ The system utilizes stateless JWT (JSON Web Tokens) for authentication.
 
 ---
 
-## 📚 Knowledge Base Management
+##  Knowledge Base Management
 
 Administrators can upload PDF documents through the Knowledge Base interface.
 1. **Extraction:** PyMuPDF extracts raw text.
@@ -94,7 +94,7 @@ Administrators can upload PDF documents through the Knowledge Base interface.
 
 ---
 
-## 💻 Technology Stack
+## Technology Stack
 
 | Layer | Technology | Justification |
 |-------|------------|---------------|
@@ -108,7 +108,7 @@ Administrators can upload PDF documents through the Knowledge Base interface.
 
 ---
 
-## 📂 Folder Structure
+## Folder Structure
 
 ```
 airport-ai-platform/
@@ -136,7 +136,7 @@ airport-ai-platform/
 
 ---
 
-## 🚀 Installation & Running
+##  Installation & Running
 
 ### Prerequisites
 - Docker Desktop (with Docker Compose v2)
@@ -188,7 +188,7 @@ If you prefer running outside Docker for active development:
 
 ---
 
-## ⚙️ Environment Variables
+##  Environment Variables
 
 Located in `.env`:
 - `SECRET_KEY`: JWT signing key.
@@ -199,7 +199,7 @@ Located in `.env`:
 ---
 ---
 
-## 🔮 Future Improvements
+##  Future Improvements
 
 - **Agent Framework Migration:** Transition from custom orchestration to LangGraph or AutoGen for complex cyclical workflows.
 - **Postgres/pgvector:** Migrate from SQLite/FAISS to PostgreSQL with `pgvector` for scalable, unified storage.
@@ -208,7 +208,7 @@ Located in `.env`:
 
 ---
 
-## 🛠 Troubleshooting
+##  Troubleshooting
 
 **"Ollama connection refused"**
 Ensure the `airport-ollama` container is running and healthy. Sometimes downloading the 2GB+ model times out on slow connections. Check logs using:
