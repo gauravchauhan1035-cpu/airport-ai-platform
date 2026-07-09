@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.auth.dependencies import get_current_user, require_role
 from app.database.session import get_db
 from app.models.user import User, UserRole
-from app.utils.input_sanitizer import sanitize_user_input, detect_prompt_injection
+from app.utils.input_sanitizer import sanitize_user_input, detect_prompt_injection, detect_data_exfiltration
 from app.utils.rate_limit import limiter
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,17 @@ async def query(
         logger.warning("Prompt injection attempt blocked from user: %s", current_user.username)
         return QueryResponse(
             question=payload.question,
-            answer="I cannot process this request. Please ask a legitimate question about airport operations.",
+            answer="I cannot disclose internal implementation details.",
+            route="BLOCKED",
+            execution_time_ms=0,
+        )
+
+    # Detect data exfiltration / schema enumeration attempts
+    if detect_data_exfiltration(sanitized_question):
+        logger.warning("Data exfiltration attempt blocked from user: %s", current_user.username)
+        return QueryResponse(
+            question=payload.question,
+            answer="I cannot disclose internal implementation details.",
             route="BLOCKED",
             execution_time_ms=0,
         )

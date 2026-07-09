@@ -11,9 +11,14 @@ _INJECTION_PATTERNS = [
     re.compile(r"ignore\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions?|rules?|prompts?|context)", re.IGNORECASE),
     re.compile(r"disregard\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions?|rules?|prompts?)", re.IGNORECASE),
     re.compile(r"forget\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions?|rules?|prompts?)", re.IGNORECASE),
-    # System prompt extraction
+    # System prompt / internals extraction
     re.compile(r"(show|reveal|display|print|output|repeat|echo)\s+(me\s+)?(your|the|system)\s+(prompt|instructions?|rules?|context)", re.IGNORECASE),
     re.compile(r"what\s+(are|is)\s+your\s+(system\s+)?(prompt|instructions?|rules?|hidden)", re.IGNORECASE),
+    # Chain-of-thought / internal reasoning extraction
+    re.compile(r"(reveal|show|explain|describe|tell\s+me)\s+(your\s+)?(chain.of.thought|reasoning|thought\s+process|internal\s+logic|decision\s+process)", re.IGNORECASE),
+    re.compile(r"how\s+do\s+you\s+(work|decide|think|process|route|determine)", re.IGNORECASE),
+    re.compile(r"(what|show)\s+(is|are)\s+your\s+(internal|hidden|secret|underlying)", re.IGNORECASE),
+    re.compile(r"walk\s+me\s+through\s+your\s+(thinking|reasoning|logic|process)", re.IGNORECASE),
     # Role play / persona override
     re.compile(r"you\s+are\s+now\s+(a|an|the)\s+", re.IGNORECASE),
     re.compile(r"act\s+as\s+(a|an|if)\s+", re.IGNORECASE),
@@ -27,9 +32,15 @@ _INJECTION_PATTERNS = [
 
 # SQL-specific dangerous patterns in user questions
 _SQL_DANGEROUS_PATTERNS = [
+    # Bulk data / table enumeration attempts
     re.compile(r"\b(show|list|display|give|dump|export)\b.*\b(all|every|entire|complete|full)\b.*\b(data|records?|rows?|tables?|columns?|schema|database|entries)\b", re.IGNORECASE),
     re.compile(r"\b(show|list|display|describe|explain)\b.*\b(schema|structure|tables?|columns?|DDL|metadata)\b", re.IGNORECASE),
     re.compile(r"\b(dump|export|download)\b.*\b(database|table|data)\b", re.IGNORECASE),
+    # Catch 'list every table', 'list all tables', 'show tables' standalone patterns
+    re.compile(r"\b(list|show|display|get)\b.{0,20}\b(every|all|the)\b.{0,10}\btables?\b", re.IGNORECASE),
+    re.compile(r"\b(what|which)\s+tables?\s+(are|exist|do\s+you\s+have)", re.IGNORECASE),
+    # Schema / database structure
+    re.compile(r"\b(show|get|display|reveal)\s+(the\s+)?\b(database\s+schema|table\s+schema|db\s+schema)", re.IGNORECASE),
     re.compile(r"\bsqlite_master\b", re.IGNORECASE),
     re.compile(r"\bpragma\b", re.IGNORECASE),
     re.compile(r"\binformation_schema\b", re.IGNORECASE),
