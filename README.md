@@ -1,18 +1,41 @@
 # Airport AI Platform
 
-AI-powered Airport Operations Monitoring Platform — a local-first system that automatically routes questions to SQL (operational metrics) or RAG (SOP documents) agents.
-
-> **Status:** Phase 1 complete — project scaffolding, Docker, FastAPI, and Next.js initialized.
+An AI-powered Airport Operations Monitoring Platform — a local-first, multi-agent system that monitors live airport metrics and intelligently routes questions to the right data source automatically.
 
 ## Architecture
 
 ```
-Browser → Next.js Frontend → FastAPI Backend → Router Agent
-                                    ├── SQL Agent → SQLite
-                                    └── RAG Agent → FAISS
-                                              ↓
-                                          Ollama (llama3.1)
+Browser
+  └── Next.js Frontend (React, TypeScript, Tailwind CSS)
+         └── FastAPI Backend
+                └── WorkflowOrchestrator
+                       ├── IntentRouter (Ollama: llama3.2)
+                       │     └── Classifies question → produces execution plan
+                       │
+                       ├── SQL Agent (Ollama: llama3.2)
+                       │     └── Converts natural language → SQL → SQLite DB
+                       │
+                       ├── RAG Agent (sentence-transformers + FAISS)
+                       │     └── Semantic search over uploaded PDF documents
+                       │
+                       ├── Chat Agent (Ollama: llama3.2)
+                       │     └── General conversation & reasoning
+                       │
+                       └── Aggregator Agent (Ollama: llama3.2)
+                             └── Merges all agent outputs into one final answer
+                                       ↓
+                             Ollama (llama3.2) — Local LLM engine
+                             powers ALL agents (Router, SQL, Chat, Aggregator)
 ```
+
+### How the Orchestrator Works
+
+1. A user asks a question in the **AI Assistant** tab.
+2. The **WorkflowOrchestrator** receives the question and fetches conversation history.
+3. The **IntentRouter** (powered by Ollama) reads the question and produces a JSON execution plan deciding which agents to run: `SQL`, `RAG`, `CHAT`, or any combination.
+4. The selected agents are executed **in parallel** for speed.
+5. The **AggregatorAgent** (powered by Ollama) merges all results into one coherent natural language answer.
+6. The answer and context are saved to conversation memory for multi-turn chat.
 
 ## Tech Stack
 
@@ -21,10 +44,18 @@ Browser → Next.js Frontend → FastAPI Backend → Router Agent
 | Frontend | Next.js 15, TypeScript, Tailwind CSS, shadcn/ui, React Query, Axios |
 | Backend | FastAPI, SQLAlchemy, Pydantic, JWT, RBAC |
 | Database | SQLite |
-| LLM | Ollama (llama3.1) |
+| LLM Engine | Ollama running llama3.2 (local, no API key needed) |
 | Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
 | Vector Store | FAISS |
-| Deployment | Docker Compose |
+| Deployment | Docker Compose (4 containers) |
+
+## User Roles
+
+| Role | Access |
+|------|--------|
+| **Admin** | Full access — Dashboard (with Service Status), Metrics, AI Assistant, Knowledge Base, Settings |
+| **Analyst** | Dashboard, Metrics, AI Assistant |
+| **Viewer** | Dashboard, Metrics (read-only) |
 
 ## Folder Structure
 
@@ -33,20 +64,21 @@ airport-ai-platform/
 ├── frontend/          # Next.js 15 application
 ├── backend/           # FastAPI application
 │   └── app/
-│       ├── api/       # Route handlers
-│       ├── agents/    # Router, SQL, RAG agents
-│       ├── services/  # Business logic
-│       ├── rag/       # RAG pipeline
-│       ├── database/  # DB session & models
-│       ├── auth/      # JWT & RBAC
-│       └── ...
+│       ├── api/           # Route handlers (health, metrics, auth, query, documents)
+│       ├── agents/        # Orchestrator, Router, SQL, Chat, Aggregator agents
+│       ├── rag/           # RAG pipeline (PDF extraction, chunking, embedding, FAISS)
+│       ├── services/      # LLM service (Ollama), Memory service
+│       ├── prompts/       # System prompts for each agent
+│       ├── database/      # DB session, models, seed data
+│       ├── auth/          # JWT & RBAC
+│       └── repositories/  # Data access layer
 ├── data/
 │   ├── pdfs/          # Uploaded PDF documents
-│   ├── faiss/         # Vector index storage
+│   ├── faiss/         # FAISS vector index storage
 │   ├── sqlite/        # SQLite database
 │   └── logs/          # Application logs
-├── docker/            # Dockerfiles
-└── docker-compose.yml
+├── docker-compose.yml
+└── .env.example
 ```
 
 ## Quick Start
@@ -54,22 +86,23 @@ airport-ai-platform/
 ### Prerequisites
 
 - Docker Desktop (with Docker Compose v2)
-- 8GB+ RAM recommended (for Ollama + llama3.1)
+- 8 GB RAM minimum (Ollama + llama3.2 + application services)
 
 ### Setup
 
 ```bash
-# Clone and enter project
+# Clone the repository
+git clone https://github.com/gauravchauhan1035-cpu/airport-ai-platform.git
 cd airport-ai-platform
 
 # Copy environment file
 cp .env.example .env
 
-# Build and start all services
-docker compose up --build
+# Build and start all services (first run pulls llama3.2 — may take a few minutes)
+docker compose up --build -d
 ```
 
-### URLs
+### Services & URLs
 
 | Service | URL |
 |---------|-----|
@@ -78,21 +111,25 @@ docker compose up --build
 | Swagger Docs | http://localhost:8000/docs |
 | Ollama | http://localhost:11434 |
 
-## Development Phases
+### Default Login Credentials
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| 1 | ✅ Complete | Project scaffolding, Docker, FastAPI, Next.js |
-| 2 | ✅ Complete | Database models, SQLite schema, seed data, repository |
-| 3 | Pending | JWT authentication & RBAC |
-| 4 | Pending | Metrics API |
-| 5 | Pending | SQL Agent |
-| 6 | Pending | RAG Pipeline |
-| 7 | Pending | Router Agent |
-| 8 | Pending | Frontend Integration |
-| 9 | Pending | Testing |
-| 10 | Pending | Optimization |
+| Username | Password | Role |
+|----------|----------|------|
+| admin | Admin!2026#ChangeMeNow | Admin |
+| analyst | Analyst!2026#ChangeMeNow | Analyst |
+| viewer | Viewer!2026#ChangeMeNow | Viewer |
+
+> ⚠️ Change default passwords immediately in any production deployment.
+
+## Docker Containers
+
+| Container | Purpose |
+|-----------|---------|
+| `airport-ollama` | Runs the local Ollama LLM server |
+| `airport-ollama-init` | One-time init container — pulls llama3.2 model |
+| `airport-backend` | FastAPI application server |
+| `airport-frontend` | Next.js production server |
 
 ## License
 
-Private — take-home assignment.
+Private — All rights reserved. Gaurav Chauhan, 2026.
