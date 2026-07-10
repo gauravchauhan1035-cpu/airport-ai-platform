@@ -72,7 +72,7 @@ class RAGAgent:
             )
         return results
 
-    def run(self, question: str) -> dict:
+    def run(self, question: str, history: list | None = None) -> dict:
         """
         Perform true RAG: Retrieve relevant chunks and generate a grounded answer using the LLM.
         """
@@ -94,7 +94,7 @@ class RAGAgent:
             system_prompt, user_message = build_rag_prompt(question, chunks)
             
             try:
-                response_text = llm.generate(system_prompt, user_message, json_format=True)
+                response_text = llm.generate(system_prompt, user_message, history=history, json_format=True)
                 payload = json.loads(response_text)
                 answer = payload.get("answer", "Failed to generate a valid answer.")
             except Exception as exc:
@@ -112,5 +112,5 @@ class RAGAgent:
         }
 
     # Keep legacy search method for backward compatibility with orchestrator until Step 7
-    def search(self, question: str) -> dict:
-        return self.run(question)
+    def search(self, question: str, history: list | None = None) -> dict:
+        return self.run(question, history=history)

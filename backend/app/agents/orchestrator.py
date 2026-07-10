@@ -21,22 +21,22 @@ class WorkflowOrchestrator:
         self.router = IntentRouter()
         self.memory = MemoryService(db)
 
-    def _run_sql(self, question: str) -> dict:
+    def _run_sql(self, question: str, history: list) -> dict:
         db = SessionLocal()
         try:
             from app.agents.sql_agent import SQLAgent
-            return SQLAgent(db).run(question)
+            return SQLAgent(db).run(question, history=history)
         except Exception as exc:
             logger.error("SQL Agent failed: %s", exc)
             return {"summary": f"SQL Error: {str(exc)}"}
         finally:
             db.close()
 
-    def _run_rag(self, question: str) -> dict:
+    def _run_rag(self, question: str, history: list) -> dict:
         db = SessionLocal()
         try:
             from app.rag.rag_agent import RAGAgent
-            return RAGAgent(db).search(question)
+            return RAGAgent(db).search(question, history=history)
         except Exception as exc:
             logger.error("RAG Agent failed: %s", exc)
             return {"error": str(exc)}
@@ -76,9 +76,9 @@ class WorkflowOrchestrator:
         # 3. Execute Agents in PARALLEL using to_thread
         tasks = []
         if "SQL" in agents_to_run:
-            tasks.append(("SQL", asyncio.to_thread(self._run_sql, question)))
+            tasks.append(("SQL", asyncio.to_thread(self._run_sql, question, history)))
         if "RAG" in agents_to_run:
-            tasks.append(("RAG", asyncio.to_thread(self._run_rag, question)))
+            tasks.append(("RAG", asyncio.to_thread(self._run_rag, question, history)))
         if "CHAT" in agents_to_run:
             tasks.append(("CHAT", asyncio.to_thread(self._run_chat, question, history)))
 

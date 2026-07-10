@@ -139,7 +139,7 @@ class SQLAgent:
 
     # ── Public interface ──────────────────────────────────────────────────────
 
-    def run(self, question: str) -> dict[str, Any]:
+    def run(self, question: str, history: list | None = None) -> dict[str, Any]:
         """Convert a natural language question to SQL, execute it.
 
         Returns:
@@ -183,7 +183,7 @@ class SQLAgent:
                     safe_error = "The previous SQL query was invalid. Generate a corrected query."
                     user_message += f"\n\n{safe_error}"
 
-                llm_output = self.llm.generate(system_prompt, user_message, json_format=True)
+                llm_output = self.llm.generate(system_prompt, user_message, history=history, json_format=True)
                 
                 # Parse JSON
                 try:
